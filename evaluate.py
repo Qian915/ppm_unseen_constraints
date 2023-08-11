@@ -1,5 +1,3 @@
-# python3 evaluate.py
-
 from classes.Attribute import Attribute
 from classes.Event import Event
 from classes.Trace import Trace
@@ -60,11 +58,16 @@ parser.add_argument("--ats_model",
     default="output/synthetic_augmented.pickle",   
     help="path to augmented_ts model")
 
+parser.add_argument("--update", 
+    type=lambda x: (str(x).lower() == 'true'), 
+    default=False, 
+    help="update the prediction model")
+
 args = parser.parse_args()
 
 
 # ATS: basic transition system without constraints
-def ts_prediction(event_stream, model_path, update=True):
+def ts_prediction(event_stream, model_path, update=False):
     picklefile = open(model_path, 'rb')
     ts = pickle.load(picklefile)
     picklefile.close()
@@ -97,7 +100,7 @@ def ts_prediction(event_stream, model_path, update=True):
     print('Recall across all prefixes:', recall)
     
 # AATS: augmented transition system including constraints
-def ats_prediction(event_stream, model_path, update=True):
+def ats_prediction(event_stream, model_path, update=False):
     picklefile = open(model_path, 'rb')
     augmented_ts = pickle.load(picklefile)
     picklefile.close()
@@ -201,16 +204,16 @@ def update_constraints(ts, constraints):
     return augmented_ts
 
 if __name__ == "__main__":
+    # ATS without constraints: no updates
     stream_ts, constraints = read_data(args.stream_path, args.stream_name, args.constraint_path, 
                                     args.constraint_name, args.fformat, args.lc_filter)  
-    # ATS without constraints: no updates
-    ts_prediction(stream_ts, args.ts_model, update=False)
+    ts_prediction(stream_ts, args.ts_model, args.update)
 
+    # AATS including constraints: no updates
     stream_ats, constraints = read_data(args.stream_path, args.stream_name, args.constraint_path, 
                                     args.constraint_name, args.fformat, args.lc_filter)
     start = time.time()
-    # AATS including constraints: no updates
-    ats_prediction(stream_ats, args.ats_model, update=False)
+    ats_prediction(stream_ats, args.ats_model, args.update)
     
     end = time.time()
-    print(f"##########Retrain and prediction time for AATS: {end-start}##########")
+    print(f"##########Retrain and prediction time for AATS: {end-start}##########") 

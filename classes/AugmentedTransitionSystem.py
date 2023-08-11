@@ -6,9 +6,9 @@ from classes.TransitionSystem import TransitionSystem
 import random
 import json
 
-COLORS = ["aquamarine3", "cornflowerblue", "cadetblue", "dodgerblue2", "cyan4"] #extend color pallette for more constraints; best would be to have dynamic one
+COLORS = ["aquamarine3", "cornflowerblue", "cadetblue", "dodgerblue2", "cyan4"]
 
-#not sure whether it would be nicer to inherit from TransitionSystem
+
 @dataclass
 class AugmentedTransitionSystem:
   transition_system : TransitionSystem
@@ -19,7 +19,7 @@ class AugmentedTransitionSystem:
   transitions_probabilities: dict = field(default_factory=dict)
   states_annotations: dict = field(default_factory=dict)
   
-  #TODO: adapt this; base probability on both i) number of outgoing arcs and ii) how often a state was observed
+
   def calculate_probabilities_relative(self):
     merged_transitions = self.transition_system.transitions | self.additional_transitions
     counter_per_pre_state = defaultdict(int)
@@ -62,34 +62,7 @@ class AugmentedTransitionSystem:
     d_graph.render(outputpath+"/"+filename, view=False, cleanup=True)
     return outputpath+"/"+filename+".pdf"
   
-  '''  
-  def predict(self,trace):
-    trace.calculate_prefixes((next(iter(self.transition_system.states))).state_abstraction)   #be careful here, could go wrong if different states have different abstraction functions! we can think of including a check before creating the transition system as such; not nice but at least one option to check for consistency
-    current_state = trace.prefixes[-1].state
-
-    merged_states = self.transition_system.states.union(self.additional_states)
-    if(current_state not in merged_states):
-      return "I have never seen this state before. Check your model!"
-    outgoing_states = self.states_annotations[current_state]
-    max_prob = max(outgoing_states.values())
-    possible_states = list()
-    for possible_state, probability in outgoing_states.items():
-      if probability == max_prob:
-        possible_states.append(possible_state)
-    # only one state possible
-    if len(possible_states) == 1:
-      res = ""
-      if possible_states[0].origin_log == False:
-        res = "THE FOLLOWING PREDICTION IS BASED ON CONSTRAINT: " + str(possible_states[0].constraint) + "\n"
-      return res + "current state is "+str(current_state)+"upcoming state is "+str(possible_states[0])+"with probability "+str(max_prob)
-    # multiple states possible
-    res = "-----MULTIPLE STATES POSSIBLE-----"
-    for state in possible_states:
-      if state.origin_log == False:
-        res = res + "\nTHE FOLLOWING PREDICTION IS BASED ON CONSTRAINT: " + str(state.constraint)
-      res = res + "\ncurrent state is "+str(current_state)+"upcoming state is "+str(state)+"with probability "+str(max_prob)
-    return res
-  '''
+  
   # predict for all possible prefixes within a trace
   def predict(self,trace):
     prefixes_prediction = []
@@ -100,12 +73,10 @@ class AugmentedTransitionSystem:
       prefixes_true.append(current_state.abstracted_events[-1].get_conceptname())
       # case 1: unseen state
       if(current_state not in self.states_annotations.keys()):
-        #print("Unable to predict as I have never seen this state before.")
         prefixes_prediction.append("unknown")
         continue
       # case 2: no prediction as this is the end state of the augmented transition system
       if self.states_annotations[current_state] == {}:
-        #print("No prediction as this is the end state")
         prefixes_prediction.append("eoc")
         continue
       # case 3: observed state
@@ -117,13 +88,10 @@ class AugmentedTransitionSystem:
           possible_states.append(possible_state)
         # only one state possible
       if len(possible_states) == 1:
-        #print(f"Next event lable for {current_state} is {possible_states[0].abstracted_events[-1]}")
         prefixes_prediction.append(possible_states[0].abstracted_events[-1].get_conceptname())
       else:
         # multiple states possible
-        #TODO how to choose one prediction from multiple states?
         next_state = random.choice(possible_states)
-        #print(f"MULTIPLE STATES POSSIBLE: next event lable for {current_state} is {next_state.abstracted_events[-1]}")
         prefixes_prediction.append(next_state.abstracted_events[-1].get_conceptname())
     prefixes_true.append("eoc")
     del prefixes_true[0]

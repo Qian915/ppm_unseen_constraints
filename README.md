@@ -30,7 +30,12 @@ Evaluate prediction results
 python3 evaluate.py
 ```
 
-Test prediction offline
+Evaluate prediction results with updates
+```
+python3 evaluate.py --update=True
+```
+
+Test prediction online
 ```
 python3 test_prediction.py
 ```

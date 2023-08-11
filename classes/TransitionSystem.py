@@ -26,7 +26,6 @@ class TransitionSystem:
     d_graph.render(outputpath+"/"+filename, view=False, cleanup=True)
     return outputpath+"/"+filename+".pdf"
 
-  # for sure not good practice
   def calculate_probabilities_relative(self):
     counter_per_pre_state = defaultdict(int)
     for transition, count in self.transitions.items():
@@ -43,40 +42,21 @@ class TransitionSystem:
         if transition.state_1 == state:
           outgoing_states.update({transition.state_2: self.transitions_probabilities[transition]})
       self.states_annotations[state] = outgoing_states
-  '''
-  def predict(self,trace):
-    trace.calculate_prefixes((next(iter(self.states))).state_abstraction)   #be careful here, could go wrong if different states have different abstraction functions! we can think of including a check before creating the transition system as such; not nice but at least one option to check for consistency
-    current_state = trace.prefixes[-1].state
-    if(current_state not in self.states):
-      return "I have never seen this state before. Check your model!"
-    transition_candidates = defaultdict(list)
-    for transition in self.transitions:
-      if(transition.state_1 == current_state):
-        transition_candidates[self.transitions_probabilities[transition]].append(transition)
-    max_prob = max(transition_candidates.keys())
-    if(len(transition_candidates[max_prob]) == 1):
-      return "current state is "+str(current_state)+"upcoming state is "+str(transition.state_2)+"with probability "+str(max_prob)
-    res = "MULTIPLE STATES POSSIBLE:"
-    for transition in transition_candidates[max_prob]:
-      res = res + "\ncurrent state is "+str(current_state)+"upcoming state is "+str(transition.state_2)+"with probability "+str(max_prob)
-    return res
-  '''
+  
   # predict for all possible prefixes within a trace
   def predict(self,trace):
     prefixes_prediction = []
     prefixes_true = []
-    trace.calculate_prefixes((next(iter(self.states))).state_abstraction)   #be careful here, could go wrong if different states have different abstraction functions! we can think of including a check before creating the transition system as such; not nice but at least one option to check for consistency
+    trace.calculate_prefixes((next(iter(self.states))).state_abstraction)
     for prefix in trace.prefixes:
       current_state = prefix.state
       prefixes_true.append(current_state.abstracted_events[-1].get_conceptname())
       # case 1: unseen state
       if(current_state not in self.states):
-        #print("Unable to predict as I have never seen this state before.")
         prefixes_prediction.append("unknown")
         continue
       # case 2: no prediction as this is the end state of the transition system
       if self.states_annotations[current_state] == {}:
-        #print("No prediction as this is the end state")
         prefixes_prediction.append("eoc")
         continue
       # case 3: observed state
@@ -88,18 +68,16 @@ class TransitionSystem:
           possible_states.append(possible_state)
         # only one state possible
       if len(possible_states) == 1:
-        #print(f"Next event lable for {current_state} is {possible_states[0].abstracted_events[-1]}")
         prefixes_prediction.append(possible_states[0].abstracted_events[-1].get_conceptname())
       else:
         # multiple states possible
-        #TODO how to choose one prediction from multiple states?
         prefixes_prediction.append(random.choice(possible_states).abstracted_events[-1].get_conceptname())
     prefixes_true.append("eoc")
     del prefixes_true[0]
     return prefixes_true, prefixes_prediction
 
   def online_predict(self,trace):
-    trace.calculate_prefixes((next(iter(self.states))).state_abstraction)   #be careful here, could go wrong if different states have different abstraction functions! we can think of including a check before creating the transition system as such; not nice but at least one option to check for consistency
+    trace.calculate_prefixes((next(iter(self.states))).state_abstraction)
     current_state = trace.prefixes[-1].state
     # case 1: unseen state
     if(current_state not in self.states):

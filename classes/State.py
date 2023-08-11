@@ -62,7 +62,7 @@ class State:
     for event in self.original_events:
       abstracted_event = event.apply_event_abstraction()
       tmp.add(abstracted_event)
-    self.abstracted_events = list(tmp)   # not nice
+    self.abstracted_events = list(tmp)
  
   def extend_(self, orig_event, origin_log, constraint):
     original_events = self.original_events.copy()

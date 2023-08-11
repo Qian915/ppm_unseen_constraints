@@ -21,7 +21,6 @@ class Trace:
     return all((me == it for me, it in zip(self.events, other.events)))
     
   def get_conceptnames(self):
-    #return list(filter(None, (ev.get_conceptname() for ev in self.events)))
     res = []
     for ev in self.events:
       if(ev.get_conceptname() is not None):
@@ -37,7 +36,6 @@ class Trace:
     if self.prefixes == []:
       self.calculate_prefixes(state_abstraction)
     
-    #self.calculate_prefixes(state_abstraction)
     abstracted_events = set()
     initial_abstracted_event = self.events[0].apply_event_abstraction()
     abstracted_events.add(initial_abstracted_event)
@@ -50,7 +48,6 @@ class Trace:
     transitions.append(Transition(initial_state, initial_abstracted_event, self.prefixes[0].state, True, None))
     
     for prefix_1, prefix_2 in pairwise(self.prefixes):
-      # remember to filter the log for different life cycle transitions beforehand -> cf. parameters in config file!
       state_1 = prefix_1.state
       state_2 = prefix_2.state
       states.add(state_1)

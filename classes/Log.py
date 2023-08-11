@@ -14,7 +14,6 @@ class Log:
   filename: str
   traces: list = field(default_factory=list)
   
-  # TODO: not general enough but not needed for our purposes right now, adapt when testing with BPIC logs etc.; implement also the lc_filter as for parse_csv
   def parse_file_xes(self,lc_filter):
     ns = {'xes': 'http://www.xes-standard.org/'}
     tree = ET.parse(os.path.join(self.input_path, self.filename))

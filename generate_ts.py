@@ -1,5 +1,8 @@
-# python3 generate_ts.py -c config_files/synthetic.config
-
+# config_files:
+  # synthetic.config: training set (200 cases); test set (200 cases)
+  # helpdesk.config: training set (all cases w/o Closed); test set (all cases with Closed)
+  # synthetic_dl.config: training set (100 cases); test set (900 cases)
+  # helpdesk_dl.config: training set (first 10% cases w/o Closed); test set (rest 90% cases with Closed)
 import argparse
 import yaml
 import os
@@ -114,8 +117,7 @@ def add_df_constraints(constraints, events, states, transitions):
           additional_states_c.add(constraint_state)
           additional_transitions_c[Transition(state,suc_abstracted,constraint_state, False, constraint)] = 1
           additional_states.add(constraint_state)                                                       
-          additional_transitions[Transition(state,suc_abstracted,constraint_state, False, constraint)] = 1  #logic for probability is implemented in AugmentedTS class, i.e., 1 is just a placeholder
-          # extend beyond constraints if further events exist
+          additional_transitions[Transition(state,suc_abstracted,constraint_state, False, constraint)] = 1
           if next_states is not None:
             for next_state in next_states:  
               additional_states_1, additional_transitions_1 = extend_beyond_constraint(next_state, constraint_state, transitions, constraint)
@@ -128,7 +130,7 @@ def add_df_constraints(constraints, events, states, transitions):
           next_states = get_next_state(state, additional_transitions_c)
           constraint_state = state.extend_(constraint.successor, False, constraint)
           additional_states.add(constraint_state)                                                       
-          additional_transitions[Transition(state,suc_abstracted,constraint_state, False, constraint)] = 1  #logic for probability is implemented in AugmentedTS class, i.e., 1 is just a placeholder  
+          additional_transitions[Transition(state,suc_abstracted,constraint_state, False, constraint)] = 1  
           # extend beyond constraints if further events exist
           if next_states is not None:  
             for next_state in next_states:  
